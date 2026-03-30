@@ -1,0 +1,35 @@
+#!/bin/bash
+# Define que o script será executado com o interpretador Bash
+
+SERIAL="/dev/ttyACM0"
+# Caminho do dispositivo serial onde o ESP32 está conectado
+
+ARQUIVO="/home/usuario/meteorologia.csv"
+# Caminho do arquivo CSV onde os dados serão gravados
+
+stty -F "$SERIAL" 115200 raw -echo
+# Configura a comunicação serial, sendo:
+# -F "$SERIAL" → dispositivo (/dev/ttyACM0)
+# 115200 → velocidade (baud rate)
+# raw → modo bruto (sem processamento de caracteres)
+# -echo → evita que os dados sejam "ecoados" de volta
+
+if [ ! -f "$ARQUIVO" ]; then
+    echo "timestamp,temperatura,umidade,pressao,vento" > "$ARQUIVO"
+fi
+# Verifica se o arquivo não existe, se NÃO for um arquivo existente, cria o arquivo e escreve o cabeçalho
+
+awk '{
+    cmd="date +\"%Y-%m-%d %H:%M:%S\""
+    cmd | getline ts
+    close(cmd)
+    print ts "," $0
+    fflush()
+}' "$SERIAL" >> "$ARQUIVO"
+
+# Inicia um programa awk, onde cada linha recebida da serial será processada dentro desse bloco, sendo:
+# cmd="date +\"%Y-%m-%d %H:%M:%S\"" -> timestamp gerado no formato: AAAA-MM-DD HH:MM:SS
+# cmd | getline ts -> Captura a saída do comando anterior e armazena na variável ts
+# print ts "," $0 -> $0 = linha completa recebida da serial (junta timestamp + dados do ESP32)
+# fflush() -> Força a gravação imediata no arquivo
+# "$SERIAL" >> "$ARQUIVO" → Adiciona as informações no final do arquivo
