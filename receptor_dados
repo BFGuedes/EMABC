@@ -15,7 +15,7 @@ stty -F "$SERIAL" 115200 raw -echo
 # -echo → evita que os dados sejam "ecoados" de volta
 
 if [ ! -f "$ARQUIVO" ]; then
-    echo "timestamp,temperatura,umidade,pressao,vento" > "$ARQUIVO"
+    echo "timestamp,sinal,temperatura,umidade,indice_pluviometrico,direcao_vento" > "$ARQUIVO"
 fi
 # Verifica se o arquivo não existe, se NÃO for um arquivo existente, cria o arquivo e escreve o cabeçalho
 
